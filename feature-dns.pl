@@ -3730,7 +3730,7 @@ if (!-r $file) {
 	$file = "$root_directory/miniserv.pem";
 	}
 my $out = &backquote_command(
-	"(openssl x509 -noout -pubkey -in ".quotemeta($temp)." | ".
+	"(openssl x509 -noout -pubkey -in ".quotemeta($file)." | ".
 	"openssl rsa -pubin -outform DER | ".
 	"openssl sha256 | ".
 	"tr \"a-z\" \"A-Z\") 2>&1 >/dev/null");
