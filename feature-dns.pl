@@ -3730,8 +3730,10 @@ if (!-r $file) {
 	$file = "$root_directory/miniserv.pem";
 	}
 my $out = &backquote_command(
-	"(openssl x509 -in ".quotemeta($file)." -outform DER | ".
-	"openssl sha256) 2>&1 >/dev/null");
+	"(openssl x509 -noout -pubkey -in ".quotemeta($temp)." | ".
+	"openssl rsa -pubin -outform DER | ".
+	"openssl sha256 | ".
+	"tr \"a-z\" \"A-Z\") 2>&1 >/dev/null");
 return $? || $out =~ /invalid\s+command/i ? $text{'index_etlsassl'} : undef;
 }
 
@@ -3749,14 +3751,16 @@ if ($chain) {
 	}
 &close_tempfile(TEMP);
 my $hash = &backquote_command(
-	"openssl x509 -in ".quotemeta($temp)." -outform DER 2>/dev/null | ".
-	"openssl sha256 2>/dev/null");
+	"openssl x509 -noout -pubkey -in ".quotemeta($temp)." 2>/dev/null | ".
+	"openssl rsa -pubin -outform DER 2>/dev/null | ".
+	"openssl sha256 2>/dev/null | " .
+	"tr \"a-z\" \"A-Z\"");
 return undef if ($?);
 $hash =~ /=\s*([0-9a-f]+)/ || return undef;
 return { 'name' => "_".$port."._tcp.".$host.".",
 	 'class' => "IN",
 	 'type' => "TLSA",
-	 'values' => [ 3, 0, 1, $1 ] };
+	 'values' => [ 3, 1, 1, $1 ] };
 }
 
 # create_sshfp_dns_record(key-file, key-type, hostname)
